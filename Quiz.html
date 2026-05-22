@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizCraft AI — Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #13131a;
+            --surface2: #1c1c28;
+            --border: #2a2a3d;
+            --accent: #7c6dfa;
+            --accent2: #fa6d8e;
+            --accent3: #6dfae0;
+            --text: #e8e8f0;
+            --muted: #7070a0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            padding: 40px 20px 80px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 50% 40% at 15% 15%, rgba(124,109,250,0.1) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 50% at 85% 85%, rgba(250,109,142,0.07) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .quiz-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 36px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .quiz-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .progress-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .q-counter {
+            font-size: 0.82rem;
+            color: var(--muted);
+        }
+
+        .progress-bar-wrap {
+            width: 120px;
+            height: 4px;
+            background: var(--surface2);
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            border-radius: 100px;
+            transition: width 0.4s ease;
+        }
+
+        /* Question cards */
+        .question-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 20px;
+            animation: slideIn 0.4s ease both;
+            transition: border-color 0.3s;
+        }
+
+        .question-card:hover {
+            border-color: rgba(124,109,250,0.3);
+        }
+
+        .q-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .q-number {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .q-type-badge {
+            font-size: 0.68rem;
+            padding: 3px 10px;
+            border-radius: 100px;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .badge-mcq         { background: rgba(124,109,250,0.15); color: #a89cff; border: 1px solid rgba(124,109,250,0.25); }
+        .badge-true_false  { background: rgba(109,250,224,0.12); color: #6dfae0; border: 1px solid rgba(109,250,224,0.2); }
+        .badge-fill_blank  { background: rgba(250,200,109,0.12); color: #fac86d; border: 1px solid rgba(250,200,109,0.2); }
+        .badge-short_answer{ background: rgba(250,109,142,0.12); color: #fa6d8e; border: 1px solid rgba(250,109,142,0.2); }
+
+        .q-text {
+            font-size: 1.02rem;
+            font-weight: 400;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+
+        /* Options */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 13px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .option-label:hover {
+            border-color: var(--accent);
+            background: rgba(124,109,250,0.08);
+        }
+
+        .option-label input[type="radio"] { display: none; }
+
+        .option-label:has(input:checked) {
+            border-color: var(--accent);
+            background: rgba(124,109,250,0.15);
+        }
+
+        .option-dot {
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            flex-shrink: 0;
+            transition: all 0.2s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .option-label:has(input:checked) .option-dot {
+            border-color: var(--accent);
+            background: var(--accent);
+        }
+
+        .option-dot::after {
+            content: '';
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: white;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .option-label:has(input:checked) .option-dot::after {
+            opacity: 1;
+        }
+
+        .option-text {
+            font-size: 0.92rem;
+            line-height: 1.4;
+        }
+
+        /* True/False — horizontal */
+        .tf-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .tf-options .option-label {
+            justify-content: center;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* Submit */
+        .submit-area {
+            margin-top: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .answered-count {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .answered-count span {
+            color: var(--accent3);
+            font-weight: 500;
+        }
+
+        .btn-submit {
+            padding: 15px 36px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(124,109,250,0.35);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-submit.loading .btn-text { opacity: 0; }
+        .btn-submit.loading .btn-spinner { opacity: 1; }
+
+        .btn-spinner {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+        }
+
+        .spinner-ring {
+            width: 20px; height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="quiz-header">
+            <div class="quiz-title">QuizCraft AI</div>
+            <div class="progress-info">
+                <span class="q-counter" id="qCounter">0 / {{ mcqs|length }} answered</span>
+                <div class="progress-bar-wrap">
+                    <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" id="quizForm">
+            {% for q in mcqs %}
+                {% set q_index = loop.index0 %}
+                {% set q_num = loop.index %}
+
+                <div class="question-card" style="animation-delay: {{ loop.index0 * 0.05 }}s">
+                    <div class="q-meta">
+                        <span class="q-number">Q{{ q_num }}</span>
+                        <span class="q-type-badge badge-{{ q.type }}">
+                            {% if q.type == 'mcq' %}Multiple Choice
+                            {% elif q.type == 'true_false' %}True / False
+                            {% elif q.type == 'fill_blank' %}Fill in the Blank
+                            {% elif q.type == 'short_answer' %}Short Answer
+                            {% else %}{{ q.type }}{% endif %}
+                        </span>
+                    </div>
+
+                    <p class="q-text">{{ q.question }}</p>
+
+                    <div class="{% if q.type == 'true_false' %}tf-options{% else %}options-list{% endif %}">
+                        {% for opt in q.options %}
+                            <label class="option-label">
+                                <input type="radio"
+                                       name="q{{ q_index }}"
+                                       value="{{ opt|e }}"
+                                       required
+                                       class="answer-radio"
+                                       data-qidx="{{ q_index }}">
+                                <span class="option-dot"></span>
+                                <span class="option-text">{{ opt }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+
+            <div class="submit-area">
+                <div class="answered-count">
+                    <span id="answeredNum">0</span> of {{ mcqs|length }} answered
+                </div>
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <span class="btn-text">Submit Quiz →</span>
+                    <span class="btn-spinner"><span class="spinner-ring"></span></span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const total = {{ mcqs|length }};
+        const answered = new Set();
+        const progressFill = document.getElementById('progressFill');
+        const qCounter = document.getElementById('qCounter');
+        const answeredNum = document.getElementById('answeredNum');
+        const submitBtn = document.getElementById('submitBtn');
+        const form = document.getElementById('quizForm');
+
+        document.querySelectorAll('.answer-radio').forEach(radio => {
+            radio.addEventListener('change', () => {
+                answered.add(radio.dataset.qidx);
+                const count = answered.size;
+                answeredNum.textContent = count;
+                qCounter.textContent = `${count} / ${total} answered`;
+                progressFill.style.width = `${(count / total) * 100}%`;
+            });
+        });
+
+        form.addEventListener('submit', () => {
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>

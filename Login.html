@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizCraft AI — Sign In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #13131a;
+            --surface2: #1c1c28;
+            --border: #2a2a3d;
+            --accent: #7c6dfa;
+            --accent2: #fa6d8e;
+            --accent3: #6dfae0;
+            --text: #e8e8f0;
+            --muted: #7070a0;
+            --correct: #4dde9a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            overflow: hidden;
+        }
+
+        /* ── LEFT PANEL (brand) ── */
+        .panel-left {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px 56px;
+            overflow: hidden;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+        }
+
+        .panel-left::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 30% 20%, rgba(124,109,250,0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 80% at 70% 80%, rgba(250,109,142,0.12) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        /* Decorative grid */
+        .panel-left::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(124,109,250,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124,109,250,0.04) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+        }
+
+        .brand-area {
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 64px;
+        }
+
+        .logo-icon {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .logo-name {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, var(--text), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(1.8rem, 3vw, 2.6rem);
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 20px;
+        }
+
+        .tagline .gradient-word {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline-sub {
+            color: var(--muted);
+            font-size: 0.95rem;
+            font-weight: 300;
+            line-height: 1.6;
+            max-width: 340px;
+        }
+
+        /* Feature pills */
+        .feature-list {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 48px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            animation: slideRight 0.5s ease both;
+        }
+
+        .feature-item:nth-child(1) { animation-delay: 0.1s; }
+        .feature-item:nth-child(2) { animation-delay: 0.2s; }
+        .feature-item:nth-child(3) { animation-delay: 0.3s; }
+
+        .feature-icon-wrap {
+            width: 36px; height: 36px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .feature-text strong {
+            display: block;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .feature-text span {
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        .left-footer {
+            position: relative;
+            z-index: 1;
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        /* ── RIGHT PANEL (form) ── */
+        .panel-right {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 40px;
+            overflow-y: auto;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .form-header {
+            margin-bottom: 36px;
+            animation: fadeDown 0.5s ease both;
+        }
+
+        .form-header h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .form-header p {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .form-header p a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .form-header p a:hover {
+            text-decoration: underline;
+        }
+
+        /* Fields */
+        .field-group {
+            margin-bottom: 18px;
+            animation: fadeUp 0.5s ease both;
+        }
+
+        .field-group:nth-child(1) { animation-delay: 0.05s; }
+        .field-group:nth-child(2) { animation-delay: 0.1s; }
+        .field-group:nth-child(3) { animation-delay: 0.15s; }
+
+        .field-label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 15px;
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        .field-input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 13px 16px 13px 42px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.93rem;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .field-input::placeholder { color: var(--muted); }
+
+        .field-input:focus {
+            border-color: var(--accent);
+            background: rgba(124,109,250,0.04);
+        }
+
+        .field-input.error {
+            border-color: var(--accent2);
+        }
+
+        /* Password toggle */
+        .pwd-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+
+        .pwd-toggle:hover { color: var(--text); }
+
+        /* Remember + forgot */
+        .row-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            animation: fadeUp 0.5s ease 0.2s both;
+        }
+
+        .remember-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .remember-wrap input[type="checkbox"] { display: none; }
+
+        .custom-check {
+            width: 18px; height: 18px;
+            border: 1.5px solid var(--border);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .remember-wrap:has(input:checked) .custom-check {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .check-mark {
+            color: white;
+            font-size: 10px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .remember-wrap:has(input:checked) .check-mark { opacity: 1; }
+
+        .remember-label {
+            font-size: 0.84rem;
+            color: var(--muted);
+            user-select: none;
+        }
+
+        .forgot-link {
+            font-size: 0.84rem;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .forgot-link:hover { text-decoration: underline; }
+
+        /* Submit */
+        .btn-auth {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            animation: fadeUp 0.5s ease 0.25s both;
+        }
+
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(124,109,250,0.35);
+        }
+
+        .btn-auth:active { transform: translateY(0); }
+
+        .btn-auth.loading .btn-text { opacity: 0; }
+        .btn-auth.loading .btn-spinner { opacity: 1; }
+
+        .btn-spinner {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+        }
+
+        .spinner-ring {
+            width: 20px; height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        /* Divider */
+        .or-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0;
+            animation: fadeUp 0.5s ease 0.3s both;
+        }
+
+        .or-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .or-text {
+            font-size: 0.75rem;
+            color: var(--muted);
+            letter-spacing: 0.05em;
+        }
+
+        /* Social buttons */
+        .social-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            animation: fadeUp 0.5s ease 0.35s both;
+        }
+
+        .btn-social {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-social:hover {
+            border-color: var(--accent);
+            background: rgba(124,109,250,0.06);
+        }
+
+        .social-icon {
+            font-size: 16px;
+        }
+
+        /* Error / success messages */
+        .alert-box {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.86rem;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: shake 0.4s ease;
+        }
+
+        .alert-error {
+            background: rgba(250,109,142,0.1);
+            border: 1px solid rgba(250,109,142,0.3);
+            color: var(--accent2);
+        }
+
+        .alert-success {
+            background: rgba(77,222,154,0.1);
+            border: 1px solid rgba(77,222,154,0.3);
+            color: var(--correct);
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideRight {
+            from { opacity: 0; transform: translateX(-20px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%       { transform: translateX(-6px); }
+            40%       { transform: translateX(6px); }
+            60%       { transform: translateX(-4px); }
+            80%       { transform: translateX(4px); }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            body { grid-template-columns: 1fr; }
+            .panel-left { display: none; }
+            .panel-right { padding: 48px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LEFT PANEL -->
+    <div class="panel-left">
+        <div class="brand-area">
+            <div class="logo">
+                <div class="logo-icon">🧠</div>
+                <div class="logo-name">QuizCraft AI</div>
+            </div>
+            <h1 class="tagline">
+                Turn any PDF into a<br>
+                <span class="gradient-word">smart quiz</span><br>
+                in seconds.
+            </h1>
+            <p class="tagline-sub">
+                Upload your study material, set a page range, and let our AI generate a perfectly balanced quiz — instantly.
+            </p>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-icon-wrap">🔍</div>
+                    <div class="feature-text">
+                        <strong>RAG-Powered Retrieval</strong>
+                        <span>Questions grounded in your document</span>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon-wrap">🔀</div>
+                    <div class="feature-text">
+                        <strong>Mixed Question Types</strong>
+                        <span>MCQ, True/False, Fill-in, Short Answer</span>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon-wrap">📊</div>
+                    <div class="feature-text">
+                        <strong>Instant Results & Review</strong>
+                        <span>Detailed score breakdown with explanations</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="left-footer">
+            © 2025 QuizCraft AI. All rights reserved.
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="panel-right">
+        <div class="form-container">
+
+            <div class="form-header">
+                <h2>Welcome back</h2>
+                <p>Don't have an account? <a href="/signup">Create one free →</a></p>
+            </div>
+
+            {% if error %}
+            <div class="alert-box alert-error">⚠ {{ error }}</div>
+            {% endif %}
+
+            {% if success %}
+            <div class="alert-box alert-success">✓ {{ success }}</div>
+            {% endif %}
+
+            <form method="post" id="loginForm">
+
+                <div class="field-group">
+                    <label class="field-label">Email address</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">✉</span>
+                        <input type="email" name="email" class="field-input" placeholder="you@example.com" required autocomplete="email">
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Password</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" name="password" class="field-input" id="pwdInput" placeholder="Enter your password" required autocomplete="current-password">
+                        <button type="button" class="pwd-toggle" id="pwdToggle" aria-label="Show password">👁</button>
+                    </div>
+                </div>
+
+                <div class="row-options">
+                    <label class="remember-wrap">
+                        <input type="checkbox" name="remember">
+                        <div class="custom-check">
+                            <span class="check-mark">✓</span>
+                        </div>
+                        <span class="remember-label">Remember me</span>
+                    </label>
+                    <a href="/forgot-password" class="forgot-link">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-auth" id="loginBtn">
+                    <span class="btn-text">Sign In →</span>
+                    <span class="btn-spinner"><span class="spinner-ring"></span></span>
+                </button>
+            </form>
+
+            <div class="or-divider">
+                <div class="or-line"></div>
+                <span class="or-text">OR CONTINUE WITH</span>
+                <div class="or-line"></div>
+            </div>
+
+            <div class="social-btns">
+                <a href="/auth/google" class="btn-social">
+                    <span class="social-icon">🌐</span> Google
+                </a>
+                <a href="/auth/github" class="btn-social">
+                    <span class="social-icon">🐱</span> GitHub
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Password visibility toggle
+        const pwdInput = document.getElementById('pwdInput');
+        const pwdToggle = document.getElementById('pwdToggle');
+        pwdToggle.addEventListener('click', () => {
+            const show = pwdInput.type === 'password';
+            pwdInput.type = show ? 'text' : 'password';
+            pwdToggle.textContent = show ? '🙈' : '👁';
+        });
+
+        // Loading state on submit
+        const form = document.getElementById('loginForm');
+        const btn = document.getElementById('loginBtn');
+        form.addEventListener('submit', () => {
+            btn.classList.add('loading');
+            btn.disabled = true;
+        });
+    </script>
+</body>
+</html>

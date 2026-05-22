@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizCraft AI — Turn PDFs into Smart Quizzes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #13131a;
+            --surface2: #1c1c28;
+            --border: #2a2a3d;
+            --accent: #7c6dfa;
+            --accent2: #fa6d8e;
+            --accent3: #6dfae0;
+            --text: #e8e8f0;
+            --muted: #7070a0;
+            --correct: #4dde9a;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
+
+        /* NAVBAR */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 40px; height: 68px;
+            background: rgba(10,10,15,0.85); backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .nav-logo-icon {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px;
+        }
+        .nav-logo-name {
+            font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem;
+            background: linear-gradient(135deg, var(--text), var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .nav-links { display: flex; align-items: center; gap: 4px; }
+        .nav-link {
+            padding: 8px 16px; color: var(--muted); text-decoration: none;
+            font-size: 0.88rem; font-weight: 500; border-radius: 8px; transition: all 0.2s;
+        }
+        .nav-link:hover { color: var(--text); background: var(--surface2); }
+        .nav-actions { display: flex; align-items: center; gap: 10px; }
+        .btn-nav-ghost {
+            padding: 9px 18px; background: transparent; border: 1px solid var(--border);
+            border-radius: 10px; color: var(--text); font-size: 0.87rem; font-weight: 500;
+            text-decoration: none; transition: all 0.2s;
+        }
+        .btn-nav-ghost:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-nav-primary {
+            padding: 9px 18px; background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none; border-radius: 10px; color: white; font-family: 'Syne', sans-serif;
+            font-size: 0.87rem; font-weight: 700; text-decoration: none; transition: all 0.25s;
+        }
+        .btn-nav-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(124,109,250,0.3); }
+
+        /* SECTIONS */
+        section { padding: 100px 40px; }
+        .section-inner { max-width: 1100px; margin: 0 auto; }
+        .section-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(124,109,250,0.15), rgba(250,109,142,0.15));
+            border: 1px solid rgba(124,109,250,0.25); border-radius: 100px;
+            padding: 6px 18px; font-size: 0.72rem; font-weight: 600;
+            letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 18px;
+        }
+        .section-title { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem,3.5vw,2.8rem); font-weight: 800; line-height: 1.15; margin-bottom: 16px; }
+        .section-title .grad { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .section-sub { color: var(--muted); font-size: 1rem; font-weight: 300; line-height: 1.7; max-width: 580px; }
+
+        /* HERO */
+        #hero {
+            min-height: 100vh; display: flex; align-items: center;
+            padding-top: 68px; position: relative; overflow: hidden;
+        }
+        #hero::before {
+            content: ''; position: absolute; inset: 0;
+            background:
+                radial-gradient(ellipse 70% 60% at 20% 30%, rgba(124,109,250,0.16) 0%, transparent 55%),
+                radial-gradient(ellipse 60% 70% at 80% 70%, rgba(250,109,142,0.10) 0%, transparent 55%),
+                radial-gradient(ellipse 40% 50% at 60% 10%, rgba(109,250,224,0.07) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        #hero::after {
+            content: ''; position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(124,109,250,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(124,109,250,0.04) 1px, transparent 1px);
+            background-size: 56px 56px; pointer-events: none;
+        }
+        .hero-inner {
+            position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; width: 100%;
+            display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 60px; padding: 0 40px;
+        }
+        .hero-left { padding: 40px 0; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(124,109,250,0.1); border: 1px solid rgba(124,109,250,0.25);
+            border-radius: 100px; padding: 7px 16px; font-size: 0.75rem; font-weight: 600;
+            letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 24px;
+            animation: fadeDown 0.5s ease both;
+        }
+        .hero-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--correct); animation: pulse 2s infinite; }
+        .hero-title { font-family: 'Syne', sans-serif; font-size: clamp(2.4rem,5vw,3.8rem); font-weight: 800; line-height: 1.1; margin-bottom: 22px; animation: fadeDown 0.6s ease 0.05s both; }
+        .hero-title .line2 { background: linear-gradient(135deg, var(--accent), var(--accent2) 50%, var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero-sub { color: var(--muted); font-size: 1.05rem; font-weight: 300; line-height: 1.7; margin-bottom: 36px; max-width: 460px; animation: fadeDown 0.6s ease 0.1s both; }
+        .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; animation: fadeDown 0.6s ease 0.15s both; }
+        .btn-hero-primary {
+            display: inline-flex; align-items: center; gap: 8px; padding: 16px 32px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none;
+            border-radius: 14px; color: white; font-family: 'Syne', sans-serif; font-size: 1rem;
+            font-weight: 700; text-decoration: none; transition: all 0.3s;
+        }
+        .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(124,109,250,0.38); }
+        .btn-hero-ghost {
+            display: inline-flex; align-items: center; gap: 8px; padding: 16px 28px;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+            color: var(--text); font-size: 0.95rem; font-weight: 500; text-decoration: none; transition: all 0.25s;
+        }
+        .btn-hero-ghost:hover { border-color: var(--accent); color: var(--accent); }
+        .hero-stats { display: flex; gap: 28px; margin-top: 40px; flex-wrap: wrap; animation: fadeDown 0.6s ease 0.2s both; }
+        .hero-stat strong { display: block; font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; }
+        .hero-stat span { font-size: 0.78rem; color: var(--muted); }
+        .hero-right { animation: fadeUp 0.7s ease 0.2s both; }
+        .hero-card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 32px; position: relative; }
+        .hero-card::before { content: ''; position: absolute; inset: -1px; border-radius: 24px; background: linear-gradient(135deg, rgba(124,109,250,0.3), transparent 50%, rgba(250,109,142,0.2)); z-index: -1; }
+        .card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+        .card-dots { display: flex; gap: 6px; }
+        .card-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .dot-r { background: #fa6d8e; } .dot-y { background: #fac86d; } .dot-g { background: #4dde9a; }
+        .card-title-sm { font-size: 0.8rem; color: var(--muted); margin-left: 4px; }
+        .quiz-preview-q { font-size: 0.88rem; font-weight: 500; color: var(--text); margin-bottom: 14px; line-height: 1.5; }
+        .quiz-preview-opt { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+        .opt-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; font-size: 0.82rem; color: var(--muted); }
+        .opt-item.correct-opt { border-color: var(--correct); background: rgba(77,222,154,0.1); color: var(--correct); }
+        .opt-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        .opt-dot::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+        .card-score-bar { height: 6px; background: var(--surface2); border-radius: 100px; overflow: hidden; }
+        .score-fill { height: 100%; width: 80%; background: linear-gradient(90deg, var(--accent), var(--correct)); border-radius: 100px; animation: growBar 1.5s ease 1s both; }
+        .card-score-label { display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.75rem; color: var(--muted); }
+        .card-score-label span:last-child { color: var(--correct); font-weight: 600; }
+        .float-badge { position: absolute; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 16px; font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); white-space: nowrap; }
+        .float-badge-1 { top: -18px; right: 24px; color: var(--correct); animation: floatA 3.5s ease-in-out infinite; }
+        .float-badge-2 { bottom: -18px; left: 24px; color: var(--accent3); animation: floatB 4s ease-in-out infinite; }
+
+        /* HOW IT WORKS */
+        #how { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .how-header { text-align: center; margin-bottom: 64px; }
+        .steps-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; position: relative; }
+        .steps-grid::before { content: ''; position: absolute; top: 36px; left: calc(12.5% + 18px); right: calc(12.5% + 18px); height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); opacity: 0.3; }
+        .step-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 18px; padding: 28px 22px; text-align: center; position: relative; transition: all 0.3s; }
+        .step-card:hover { border-color: rgba(124,109,250,0.4); transform: translateY(-4px); }
+        .step-num { width: 44px; height: 44px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem; color: white; margin: 0 auto 18px; }
+        .step-icon { font-size: 22px; margin-bottom: 14px; }
+        .step-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+        .step-desc { font-size: 0.84rem; color: var(--muted); line-height: 1.6; }
+
+        /* ABOUT */
+        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+        .about-visual { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 36px; position: relative; overflow: hidden; }
+        .about-visual::before { content: ''; position: absolute; top: -30%; right: -20%; width: 250px; height: 250px; background: radial-gradient(circle, rgba(124,109,250,0.15) 0%, transparent 70%); pointer-events: none; }
+        .tech-stack { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .tech-item { display: flex; align-items: center; gap: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 14px; transition: all 0.2s; }
+        .tech-item:hover { border-color: var(--accent); }
+        .tech-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .tech-info strong { display: block; font-size: 0.84rem; font-weight: 600; }
+        .tech-info span { font-size: 0.72rem; color: var(--muted); }
+        .about-highlight { display: flex; flex-direction: column; gap: 16px; }
+        .highlight-item { display: flex; gap: 14px; align-items: flex-start; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+        .h-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .h-icon-purple { background: rgba(124,109,250,0.15); } .h-icon-pink { background: rgba(250,109,142,0.15); } .h-icon-cyan { background: rgba(109,250,224,0.15); }
+        .h-text strong { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 3px; }
+        .h-text span { font-size: 0.82rem; color: var(--muted); }
+
+        /* BENEFITS */
+        #benefits { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .benefits-header { text-align: center; margin-bottom: 64px; }
+        .benefits-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+        .benefit-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 32px 26px; transition: all 0.3s; position: relative; overflow: hidden; }
+        .benefit-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; opacity: 0; transition: opacity 0.3s; }
+        .benefit-card:nth-child(1)::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+        .benefit-card:nth-child(2)::before { background: linear-gradient(90deg, var(--accent2), var(--accent3)); }
+        .benefit-card:nth-child(3)::before { background: linear-gradient(90deg, var(--accent3), var(--accent)); }
+        .benefit-card:nth-child(4)::before { background: linear-gradient(90deg, var(--accent), var(--correct)); }
+        .benefit-card:nth-child(5)::before { background: linear-gradient(90deg, var(--correct), var(--accent2)); }
+        .benefit-card:nth-child(6)::before { background: linear-gradient(90deg, var(--accent2), var(--accent)); }
+        .benefit-card:hover { border-color: rgba(124,109,250,0.35); transform: translateY(-5px); box-shadow: 0 16px 40px rgba(0,0,0,0.3); }
+        .benefit-card:hover::before { opacity: 1; }
+        .benefit-icon { font-size: 2.2rem; margin-bottom: 18px; display: block; }
+        .benefit-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; }
+        .benefit-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.65; }
+
+        /* LEARNINGS */
+        .learn-header { text-align: center; margin-bottom: 64px; }
+        .learn-tabs { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 48px; }
+        .learn-tab { padding: 10px 22px; background: var(--surface2); border: 1px solid var(--border); border-radius: 100px; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.2s; color: var(--muted); font-family: 'DM Sans', sans-serif; }
+        .learn-tab.active, .learn-tab:hover { background: rgba(124,109,250,0.15); border-color: var(--accent); color: var(--accent); }
+        .learn-panel { display: none; }
+        .learn-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .learn-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 26px; transition: all 0.25s; }
+        .learn-card:hover { border-color: rgba(124,109,250,0.3); }
+        .learn-icon { font-size: 1.8rem; margin-bottom: 14px; }
+        .learn-title { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+        .learn-desc { font-size: 0.84rem; color: var(--muted); line-height: 1.6; }
+        .learn-tag { display: inline-block; margin-top: 14px; padding: 4px 12px; background: rgba(124,109,250,0.12); border: 1px solid rgba(124,109,250,0.2); border-radius: 100px; font-size: 0.72rem; color: var(--accent); font-weight: 600; }
+
+        /* FAQ */
+        #faq { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .faq-header { text-align: center; margin-bottom: 56px; }
+        .faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .faq-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: border-color 0.2s; }
+        .faq-item.open { border-color: rgba(124,109,250,0.35); }
+        .faq-q { display: flex; justify-content: space-between; align-items: center; padding: 20px 22px; cursor: pointer; user-select: none; }
+        .faq-q-text { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 600; line-height: 1.4; padding-right: 16px; }
+        .faq-chevron { font-size: 0.8rem; color: var(--muted); transition: transform 0.3s; flex-shrink: 0; }
+        .faq-item.open .faq-chevron { transform: rotate(180deg); }
+        .faq-a { display: none; padding: 0 22px 20px; font-size: 0.875rem; color: var(--muted); line-height: 1.7; }
+        .faq-item.open .faq-a { display: block; }
+
+        /* CONTACT */
+        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: flex-start; }
+        .contact-channels { display: flex; flex-direction: column; gap: 16px; margin-top: 32px; }
+        .contact-channel { display: flex; align-items: center; gap: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; transition: all 0.2s; }
+        .contact-channel:hover { border-color: rgba(124,109,250,0.35); }
+        .ch-icon { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .ch-purple { background: rgba(124,109,250,0.15); } .ch-pink { background: rgba(250,109,142,0.15); } .ch-cyan { background: rgba(109,250,224,0.15); }
+        .ch-label { font-size: 0.73rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+        .ch-value { font-size: 0.93rem; font-weight: 500; }
+        .contact-form-card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 36px; }
+        .cf-title { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 700; margin-bottom: 24px; }
+        .cf-field { margin-bottom: 16px; }
+        .cf-label { display: block; font-size: 0.73rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+        .cf-input, .cf-textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 11px; padding: 12px 16px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
+        .cf-input::placeholder, .cf-textarea::placeholder { color: var(--muted); }
+        .cf-input:focus, .cf-textarea:focus { border-color: var(--accent); }
+        .cf-textarea { height: 120px; resize: vertical; }
+        .cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn-cf { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 12px; color: white; font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; margin-top: 8px; transition: all 0.3s; }
+        .btn-cf:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(124,109,250,0.35); }
+        .alert-success { background: rgba(77,222,154,0.1); border: 1px solid rgba(77,222,154,0.3); border-radius: 12px; padding: 14px 18px; color: var(--correct); font-size: 0.88rem; margin-bottom: 20px; }
+
+        /* FOOTER */
+        footer { background: var(--surface); border-top: 1px solid var(--border); padding: 60px 40px 36px; }
+        .footer-inner { max-width: 1100px; margin: 0 auto; }
+        .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+        .footer-brand p { font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-top: 14px; max-width: 260px; }
+        .footer-col h4 { font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+        .footer-col a { display: block; font-size: 0.87rem; color: var(--muted); text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
+        .footer-col a:hover { color: var(--text); }
+        .footer-divider { height: 1px; background: var(--border); margin-bottom: 28px; }
+        .footer-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+        .footer-bottom p { font-size: 0.8rem; color: var(--muted); }
+        .footer-links { display: flex; gap: 20px; }
+        .footer-links a { font-size: 0.8rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--text); }
+
+        /* ANIMATIONS */
+        @keyframes fadeDown { from { opacity:0; transform:translateY(-18px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeUp   { from { opacity:0; transform:translateY(18px); }  to { opacity:1; transform:translateY(0); } }
+        @keyframes pulse    { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+        @keyframes growBar  { from { width:0%; } to { width:80%; } }
+        @keyframes floatA   { 0%,100% { transform:translateY(0) rotate(-2deg); } 50% { transform:translateY(-10px) rotate(1deg); } }
+        @keyframes floatB   { 0%,100% { transform:translateY(0) rotate(2deg); }  50% { transform:translateY(-8px) rotate(-1deg); } }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .hero-inner { grid-template-columns:1fr; } .hero-right { display:none; }
+            .steps-grid { grid-template-columns:1fr 1fr; } .steps-grid::before { display:none; }
+            .about-grid, .faq-grid, .contact-grid { grid-template-columns:1fr; }
+            .benefits-grid { grid-template-columns:1fr 1fr; }
+            .learn-panel.active { grid-template-columns:1fr; }
+            .footer-top { grid-template-columns:1fr 1fr; }
+            .navbar { padding:0 20px; } .nav-links { display:none; }
+            section { padding:72px 24px; }
+        }
+        @media (max-width: 600px) {
+            .benefits-grid, .steps-grid, .footer-top { grid-template-columns:1fr; }
+            .hero-title { font-size:2.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a class="nav-logo" href="/landing">
+        <div class="nav-logo-icon">🧠</div>
+        <span class="nav-logo-name">QuizCraft AI</span>
+    </a>
+    <div class="nav-links">
+        <a class="nav-link" href="#how">How It Works</a>
+        <a class="nav-link" href="#about">About</a>
+        <a class="nav-link" href="#benefits">Benefits</a>
+        <a class="nav-link" href="#faq">FAQ</a>
+        <a class="nav-link" href="#contact">Contact</a>
+    </div>
+    <div class="nav-actions">
+        <a class="btn-nav-ghost" href="/login">Sign In</a>
+        <a class="btn-nav-primary" href="/signup">Get Started Free</a>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+    <div class="hero-inner">
+        <div class="hero-left">
+            <div class="hero-badge">✦ Powered by Gemini AI</div>
+            <h1 class="hero-title">Your PDFs,<br><span class="line2">Turned Into</span><br>Smart Quizzes.</h1>
+            <p class="hero-sub">Upload any ebook, lecture notes, or study material — QuizCraft AI reads it, understands it, and generates a perfectly balanced quiz in seconds.</p>
+            <div class="hero-cta">
+                <a href="/signup" class="btn-hero-primary">Start for Free →</a>
+                <a href="#how" class="btn-hero-ghost">▶ See How It Works</a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat"><strong>4</strong><span>Question types</span></div>
+                <div class="hero-stat"><strong>&lt;30s</strong><span>Quiz generation</span></div>
+                <div class="hero-stat"><strong>RAG</strong><span>Retrieval-backed</span></div>
+            </div>
+        </div>
+        <div class="hero-right">
+            <div class="hero-card">
+                <div class="float-badge float-badge-1">✓ Quiz Generated!</div>
+                <div class="float-badge float-badge-2">⚡ 28 seconds</div>
+                <div class="card-top">
+                    <div class="card-dots"><div class="card-dot dot-r"></div><div class="card-dot dot-y"></div><div class="card-dot dot-g"></div></div>
+                    <span class="card-title-sm">QuizCraft AI — Live Preview</span>
+                </div>
+                <p class="quiz-preview-q">Q3 · Which technique does RAG use to improve generation accuracy?</p>
+                <div class="quiz-preview-opt">
+                    <div class="opt-item"><div class="opt-dot"></div>Fine-tuning the base model</div>
+                    <div class="opt-item correct-opt"><div class="opt-dot"></div>Retrieving relevant context before generation ✓</div>
+                    <div class="opt-item"><div class="opt-dot"></div>Increasing the context window</div>
+                    <div class="opt-item"><div class="opt-dot"></div>Prompt chaining</div>
+                </div>
+                <div class="card-score-bar"><div class="score-fill"></div></div>
+                <div class="card-score-label"><span>Your progress</span><span>8 / 10 correct — 80%</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+    <div class="section-inner">
+        <div class="how-header">
+            <div class="section-badge">✦ Simple Process</div>
+            <h2 class="section-title">From PDF to Quiz in <span class="grad">4 Steps</span></h2>
+            <p class="section-sub" style="margin:0 auto;">No setup, no configuration. Just upload and go.</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card"><div class="step-num">1</div><div class="step-icon">📄</div><div class="step-title">Upload Your PDF</div><p class="step-desc">Drag & drop any PDF — textbooks, notes, reports, research papers. Up to hundreds of pages.</p></div>
+            <div class="step-card"><div class="step-num">2</div><div class="step-icon">⚙️</div><div class="step-title">Configure Quiz</div><p class="step-desc">Set the page range, number of questions, and let the AI decide the best mix of question types.</p></div>
+            <div class="step-card"><div class="step-num">3</div><div class="step-icon">🤖</div><div class="step-title">AI Generates</div><p class="step-desc">Gemini reads your document via RAG, retrieves relevant chunks, and crafts accurate questions instantly.</p></div>
+            <div class="step-card"><div class="step-num">4</div><div class="step-icon">🎯</div><div class="step-title">Take & Review</div><p class="step-desc">Answer the quiz, submit, and get a detailed breakdown of what you got right and where to improve.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+    <div class="section-inner">
+        <div class="about-grid">
+            <div class="about-visual">
+                <div class="section-badge" style="margin-bottom:24px;">✦ Under the Hood</div>
+                <div class="tech-stack">
+                    <div class="tech-item"><div class="tech-icon" style="background:rgba(66,133,244,0.15);">🔷</div><div class="tech-info"><strong>Gemini Flash</strong><span>Generation engine</span></div></div>
+                    <div class="tech-item"><div class="tech-icon" style="background:rgba(109,250,224,0.15);">🔍</div><div class="tech-info"><strong>FAISS Index</strong><span>Vector search</span></div></div>
+                    <div class="tech-item"><div class="tech-icon" style="background:rgba(124,109,250,0.15);">📦</div><div class="tech-info"><strong>RAG Pipeline</strong><span>Context retrieval</span></div></div>
+                    <div class="tech-item"><div class="tech-icon" style="background:rgba(250,109,142,0.15);">🐍</div><div class="tech-info"><strong>Flask + PyPDF2</strong><span>Backend & parsing</span></div></div>
+                    <div class="tech-item"><div class="tech-icon" style="background:rgba(77,222,154,0.15);">🔐</div><div class="tech-info"><strong>Secure Auth</strong><span>SHA-256 passwords</span></div></div>
+                    <div class="tech-item"><div class="tech-icon" style="background:rgba(250,200,109,0.15);">📊</div><div class="tech-info"><strong>JSON Schema</strong><span>Structured output</span></div></div>
+                </div>
+            </div>
+            <div class="about-content">
+                <div class="section-badge">✦ About QuizCraft AI</div>
+                <h2 class="section-title">Built for <span class="grad">Serious Learners</span></h2>
+                <p class="section-sub" style="max-width:100%;margin-bottom:28px;">QuizCraft AI was built to solve a real problem: studying from long documents is passive and ineffective. We use Retrieval-Augmented Generation so questions come directly from <em>your</em> material — not generic knowledge.</p>
+                <div class="about-highlight">
+                    <div class="highlight-item"><div class="h-icon h-icon-purple">🧠</div><div class="h-text"><strong>RAG-Grounded Questions</strong><span>Every question is grounded in your document, not hallucinated from thin air.</span></div></div>
+                    <div class="highlight-item"><div class="h-icon h-icon-pink">🔀</div><div class="h-text"><strong>Mixed Format Testing</strong><span>MCQ, True/False, Fill-in-the-Blank, and Short Answer — all in one quiz.</span></div></div>
+                    <div class="highlight-item"><div class="h-icon h-icon-cyan">🎯</div><div class="h-text"><strong>Instant Feedback</strong><span>Detailed result review with correct answers highlighted so you know exactly where to focus.</span></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- BENEFITS -->
+<section id="benefits">
+    <div class="section-inner">
+        <div class="benefits-header">
+            <div class="section-badge">✦ Why QuizCraft</div>
+            <h2 class="section-title">Everything You Need to <span class="grad">Learn Faster</span></h2>
+            <p class="section-sub" style="margin:0 auto;">One tool that replaces flashcards, practice tests, and passive re-reading.</p>
+        </div>
+        <div class="benefits-grid">
+            <div class="benefit-card"><span class="benefit-icon">⚡</span><div class="benefit-title">Instant Generation</div><p class="benefit-desc">Go from uploading a PDF to answering questions in under 30 seconds. No waiting, no manual work.</p></div>
+            <div class="benefit-card"><span class="benefit-icon">🎯</span><div class="benefit-title">Document-Accurate</div><p class="benefit-desc">Questions are drawn directly from your pages — not a general knowledge database. Every answer traces back to your source.</p></div>
+            <div class="benefit-card"><span class="benefit-icon">🔀</span><div class="benefit-title">Varied Question Types</div><p class="benefit-desc">4 different formats keep your brain engaged and test comprehension from multiple angles — recall, application, and judgment.</p></div>
+            <div class="benefit-card"><span class="benefit-icon">📊</span><div class="benefit-title">Detailed Results</div><p class="benefit-desc">After every quiz, see a question-by-question review with your answers, correct answers, and your total score visualized.</p></div>
+            <div class="benefit-card"><span class="benefit-icon">🔒</span><div class="benefit-title">Secure & Private</div><p class="benefit-desc">Your PDFs are processed in memory and never stored. Your account is protected with hashed passwords and session security.</p></div>
+            <div class="benefit-card"><span class="benefit-icon">♾️</span><div class="benefit-title">Unlimited Retakes</div><p class="benefit-desc">Retake the same quiz or upload a new PDF anytime. Every quiz attempt refreshes your understanding.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- LEARNINGS / USE CASES -->
+<section id="learnings">
+    <div class="section-inner">
+        <div class="learn-header">
+            <div class="section-badge">✦ Use Cases</div>
+            <h2 class="section-title">Works for <span class="grad">Every Learner</span></h2>
+            <p class="section-sub" style="margin:0 auto;">From medical students to corporate trainers — QuizCraft AI adapts to your needs.</p>
+        </div>
+        <div class="learn-tabs">
+            <button class="learn-tab active" onclick="switchTab('students',this)">Students</button>
+            <button class="learn-tab" onclick="switchTab('educators',this)">Educators</button>
+            <button class="learn-tab" onclick="switchTab('professionals',this)">Professionals</button>
+            <button class="learn-tab" onclick="switchTab('researchers',this)">Researchers</button>
+        </div>
+        <div>
+            <div class="learn-panel active" id="panel-students">
+                <div class="learn-card"><div class="learn-icon">📚</div><div class="learn-title">Exam Preparation</div><p class="learn-desc">Upload your textbook chapters and generate practice questions identical to what professors typically ask.</p><span class="learn-tag">Exam prep</span></div>
+                <div class="learn-card"><div class="learn-icon">🏫</div><div class="learn-title">Lecture Notes Review</div><p class="learn-desc">Turn dense lecture slides into bite-sized quiz sessions. Active recall boosts retention by 40% over passive re-reading.</p><span class="learn-tag">Active recall</span></div>
+                <div class="learn-card"><div class="learn-icon">🩺</div><div class="learn-title">Medical & Law Studies</div><p class="learn-desc">Ideal for content-heavy disciplines — drill pharmacology chapters, case law, anatomy, any dense material.</p><span class="learn-tag">High-volume content</span></div>
+                <div class="learn-card"><div class="learn-icon">🗣️</div><div class="learn-title">Language Learning</div><p class="learn-desc">Use quizzes on grammar guides or vocabulary PDFs to test comprehension in your target language.</p><span class="learn-tag">Language skills</span></div>
+            </div>
+            <div class="learn-panel" id="panel-educators">
+                <div class="learn-card"><div class="learn-icon">✏️</div><div class="learn-title">Quick Quiz Creation</div><p class="learn-desc">Generate formative assessments from your course PDFs in seconds. Share questions directly with students.</p><span class="learn-tag">Assessment</span></div>
+                <div class="learn-card"><div class="learn-icon">📝</div><div class="learn-title">Curriculum Verification</div><p class="learn-desc">Check if your reading material covers key concepts by testing it yourself before assigning it.</p><span class="learn-tag">Curriculum design</span></div>
+                <div class="learn-card"><div class="learn-icon">🧪</div><div class="learn-title">Classroom Activities</div><p class="learn-desc">Run live quiz sessions from textbook pages. Immediate results keep students engaged and accountable.</p><span class="learn-tag">Engagement</span></div>
+                <div class="learn-card"><div class="learn-icon">🎓</div><div class="learn-title">Student Self-Testing</div><p class="learn-desc">Assign PDFs and let students quiz themselves before class. Flipped classroom made easy.</p><span class="learn-tag">Flipped learning</span></div>
+            </div>
+            <div class="learn-panel" id="panel-professionals">
+                <div class="learn-card"><div class="learn-icon">🏢</div><div class="learn-title">Corporate Training</div><p class="learn-desc">Turn compliance documents, SOPs, and training manuals into knowledge-check quizzes for your team.</p><span class="learn-tag">L&D</span></div>
+                <div class="learn-card"><div class="learn-icon">📜</div><div class="learn-title">Certification Prep</div><p class="learn-desc">Study guides for PMP, AWS, CFA, UPSC — upload the official material and drill with AI-generated questions.</p><span class="learn-tag">Certifications</span></div>
+                <div class="learn-card"><div class="learn-icon">⚖️</div><div class="learn-title">Legal & Compliance</div><p class="learn-desc">Test comprehension of regulatory documents, contracts, and policy updates across your organization.</p><span class="learn-tag">Compliance</span></div>
+                <div class="learn-card"><div class="learn-icon">🚀</div><div class="learn-title">Product Onboarding</div><p class="learn-desc">Convert product documentation into onboarding quizzes to verify new-hire understanding.</p><span class="learn-tag">Onboarding</span></div>
+            </div>
+            <div class="learn-panel" id="panel-researchers">
+                <div class="learn-card"><div class="learn-icon">🔬</div><div class="learn-title">Literature Review</div><p class="learn-desc">Quiz yourself on key findings of research papers to internalize methodology, results, and conclusions.</p><span class="learn-tag">Research papers</span></div>
+                <div class="learn-card"><div class="learn-icon">📑</div><div class="learn-title">Conference Prep</div><p class="learn-desc">Test your command of submitted papers before presenting. Be prepared for any audience question.</p><span class="learn-tag">Presentation readiness</span></div>
+                <div class="learn-card"><div class="learn-icon">🌐</div><div class="learn-title">Cross-Domain Learning</div><p class="learn-desc">Exploring a new field? Generate quizzes from foundational papers to build core understanding quickly.</p><span class="learn-tag">Interdisciplinary</span></div>
+                <div class="learn-card"><div class="learn-icon">💡</div><div class="learn-title">Grant Review</div><p class="learn-desc">Ensure full comprehension of funding guidelines and requirements before submission.</p><span class="learn-tag">Grants</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+    <div class="section-inner">
+        <div class="faq-header">
+            <div class="section-badge">✦ FAQ</div>
+            <h2 class="section-title">Frequently Asked <span class="grad">Questions</span></h2>
+            <p class="section-sub" style="margin:0 auto;">Everything you need to know before getting started.</p>
+        </div>
+        <div class="faq-grid">
+            <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q"><span class="faq-q-text">Is QuizCraft AI free to use?</span><span class="faq-chevron">▼</span></div><div class="faq-a">Yes! Creating an account and generating quizzes is completely free. You can upload any PDF and generate up to 5 questions per quiz on the free plan. Paid plans for higher limits are coming soon.</div></div>
+            <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q"><span class="faq-q-text">What types of questions does it generate?</span><span class="faq-chevron">▼</span></div><div class="faq-a">QuizCraft AI generates 4 types automatically: Multiple Choice, True/False, Fill in the Blank, and Short Answer. The AI selects the best mix based on your document content.</div></div>
+            <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q"><span class="faq-q-text">How accurate are the generated questions?</span><span class="faq-chevron">▼</span></div><div class="faq-a">Because we use Retrieval-Augmented Generation (RAG), questions are grounded in your actual document rather than general model knowledge. This significantly reduces hallucinations and keeps questions relevant.</div></div>
+            <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q"><span class="faq-q-text">Is my PDF data stored or shared?</span><span class="faq-chevron">▼</span></div><div class="faq-a">No. Your PDF is processed entirely in memory during your session and is never written to disk or shared with third parties. Your documents remain yours.</div></div>
+            <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q"><span class="faq-q-text">What is the maximum PDF size I can upload?</span><span class="faq-chevron">▼</span></div><div class="faq-a">You can upload PDFs of any size. For best results, we recommend setting a page range of 5–20 pages. You can quiz different page ranges of the same PDF multiple times.</div></div>
+            <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q"><span class="faq-q-text">Can I retake the same quiz?</span><span class="faq-chevron">▼</span></div><div class="faq-a">Yes! After viewing your results, click "Retake Quiz" to attempt the same question set again — perfect for spaced repetition. Or upload a new PDF for a completely fresh quiz.</div></div>
+            <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q"><span class="faq-q-text">Why is Google sign-in not working yet?</span><span class="faq-chevron">▼</span></div><div class="faq-a">Google and GitHub OAuth is actively being developed and coming very soon. In the meantime, creating a free account with email and password takes under 30 seconds — same great experience.</div></div>
+            <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q"><span class="faq-q-text">What AI model powers QuizCraft?</span><span class="faq-chevron">▼</span></div><div class="faq-a">QuizCraft uses Google Gemini 2.5 Flash Lite for question generation and Gemini Embedding 001 for document indexing. FAISS is used as the vector database for fast similarity search.</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+    <div class="section-inner">
+        <div class="contact-grid">
+            <div class="contact-info">
+                <div class="section-badge">✦ Get in Touch</div>
+                <h2 class="section-title">We're Here to <span class="grad">Help</span></h2>
+                <p class="section-sub" style="max-width:100%;">Have a question, feature request, or feedback? We read every message and usually respond within 24 hours.</p>
+                <div class="contact-channels">
+                    <div class="contact-channel"><div class="ch-icon ch-purple">✉</div><div><div class="ch-label">Email Support</div><div class="ch-value">support@quizcraftai.com</div></div></div>
+                    <div class="contact-channel"><div class="ch-icon ch-pink">📞</div><div><div class="ch-label">Phone (India)</div><div class="ch-value">+91 98765 43210</div></div></div>
+                    <div class="contact-channel"><div class="ch-icon ch-cyan">🕐</div><div><div class="ch-label">Support Hours</div><div class="ch-value">Mon – Sat, 9 AM – 6 PM IST</div></div></div>
+                </div>
+            </div>
+            <div class="contact-form-card">
+                <div class="cf-title">Send Us a Message</div>
+                {% if contact_sent %}
+                <div class="alert-success">✓ Message sent! We'll get back to you within 24 hours.</div>
+                {% endif %}
+                <form method="post" action="/contact">
+                    <div class="cf-row">
+                        <div class="cf-field"><label class="cf-label">First Name</label><input type="text" class="cf-input" placeholder="Aarav" required name="first_name"></div>
+                        <div class="cf-field"><label class="cf-label">Last Name</label><input type="text" class="cf-input" placeholder="Singh" required name="last_name"></div>
+                    </div>
+                    <div class="cf-field"><label class="cf-label">Email</label><input type="email" class="cf-input" placeholder="you@example.com" required name="email"></div>
+                    <div class="cf-field"><label class="cf-label">Subject</label><input type="text" class="cf-input" placeholder="How can we help?" required name="subject"></div>
+                    <div class="cf-field"><label class="cf-label">Message</label><textarea class="cf-textarea" placeholder="Tell us more..." required name="message"></textarea></div>
+                    <button type="submit" class="btn-cf">Send Message →</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="footer">
+    <div class="footer-inner">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="nav-logo-icon">🧠</div>
+                    <span class="nav-logo-name">QuizCraft AI</span>
+                </div>
+                <p>AI-powered quiz generation from any PDF. Built for students, educators, and professionals who take learning seriously.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Product</h4>
+                <a href="#how">How It Works</a>
+                <a href="#benefits">Benefits</a>
+                <a href="#learnings">Use Cases</a>
+                <a href="/signup">Get Started</a>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <a href="#about">About</a>
+                <a href="#faq">FAQ</a>
+                <a href="#contact">Contact</a>
+            </div>
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <a href="/terms">Terms of Service</a>
+                <a href="/privacy">Privacy Policy</a>
+            </div>
+        </div>
+        <div class="footer-divider"></div>
+        <div class="footer-bottom">
+            <p>© 2025 QuizCraft AI. All rights reserved. Made with ❤️ in India.</p>
+            <div class="footer-links">
+                <a href="/terms">Terms</a>
+                <a href="/privacy">Privacy</a>
+                <a href="#contact">Support</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    function toggleFaq(el) {
+        const isOpen = el.classList.contains('open');
+        document.querySelectorAll('.faq-item.open').forEach(e => e.classList.remove('open'));
+        if (!isOpen) el.classList.add('open');
+    }
+    function switchTab(id, btn) {
+        document.querySelectorAll('.learn-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.learn-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('panel-' + id).classList.add('active');
+        btn.classList.add('active');
+    }
+    // Open first FAQ by default
+    document.querySelector('.faq-item').classList.add('open');
+
+    // Auto-scroll from Flask route
+    const scrollTo = "{{ scroll_to }}";
+    if (scrollTo && scrollTo !== 'None') {
+        window.addEventListener('load', () => {
+            const el = document.getElementById(scrollTo);
+            if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 300);
+        });
+    }
+
+    // Active nav highlight on scroll
+    window.addEventListener('scroll', () => {
+        let current = '';
+        document.querySelectorAll('section[id]').forEach(s => {
+            if (window.scrollY >= s.offsetTop - 100) current = s.id;
+        });
+        document.querySelectorAll('.nav-link').forEach(l => {
+            l.style.color = l.getAttribute('href') === '#' + current ? 'var(--text)' : '';
+        });
+    });
+</script>
+</body>
+</html>

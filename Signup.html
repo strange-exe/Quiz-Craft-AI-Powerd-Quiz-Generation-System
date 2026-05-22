@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizCraft AI — Create Account</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #13131a;
+            --surface2: #1c1c28;
+            --border: #2a2a3d;
+            --accent: #7c6dfa;
+            --accent2: #fa6d8e;
+            --accent3: #6dfae0;
+            --text: #e8e8f0;
+            --muted: #7070a0;
+            --correct: #4dde9a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            overflow: hidden;
+        }
+
+        /* ── LEFT PANEL ── */
+        .panel-left {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px 56px;
+            overflow: hidden;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+        }
+
+        .panel-left::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 30% 20%, rgba(109,250,224,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 80% at 70% 80%, rgba(124,109,250,0.14) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .panel-left::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(109,250,224,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(109,250,224,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+        }
+
+        .brand-area { position: relative; z-index: 1; }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 64px;
+        }
+
+        .logo-icon {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .logo-name {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, var(--text), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(1.8rem, 3vw, 2.5rem);
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 20px;
+        }
+
+        .tagline .gradient-word {
+            background: linear-gradient(135deg, var(--accent3), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline-sub {
+            color: var(--muted);
+            font-size: 0.95rem;
+            font-weight: 300;
+            line-height: 1.6;
+            max-width: 340px;
+            margin-bottom: 40px;
+        }
+
+        /* Testimonial card */
+        .testimonial {
+            position: relative;
+            z-index: 1;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
+            margin-top: 40px;
+        }
+
+        .testimonial-text {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text);
+            margin-bottom: 16px;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .author-avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .author-name {
+            font-size: 0.83rem;
+            font-weight: 500;
+        }
+
+        .author-role {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .stars {
+            margin-left: auto;
+            font-size: 12px;
+            letter-spacing: 1px;
+            color: #fac86d;
+        }
+
+        .left-footer {
+            position: relative;
+            z-index: 1;
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        /* ── RIGHT PANEL ── */
+        .panel-right {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 40px;
+            overflow-y: auto;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .form-header {
+            margin-bottom: 32px;
+            animation: fadeDown 0.5s ease both;
+        }
+
+        .form-header h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .form-header p {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .form-header p a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .form-header p a:hover { text-decoration: underline; }
+
+        /* Row layout for name fields */
+        .fields-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .field-group {
+            margin-bottom: 16px;
+            animation: fadeUp 0.5s ease both;
+        }
+
+        .field-group:nth-child(1) { animation-delay: 0.05s; }
+        .field-group:nth-child(2) { animation-delay: 0.1s; }
+        .field-group:nth-child(3) { animation-delay: 0.15s; }
+        .field-group:nth-child(4) { animation-delay: 0.2s; }
+
+        .field-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .input-wrap { position: relative; }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        .field-input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 13px 16px 13px 42px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .field-input::placeholder { color: var(--muted); }
+
+        .field-input:focus {
+            border-color: var(--accent);
+            background: rgba(124,109,250,0.04);
+        }
+
+        .field-input.no-icon {
+            padding-left: 16px;
+        }
+
+        /* Password strength meter */
+        .pwd-strength {
+            margin-top: 8px;
+            display: none;
+        }
+
+        .pwd-strength.visible { display: block; }
+
+        .strength-bar-wrap {
+            height: 4px;
+            background: var(--surface2);
+            border-radius: 100px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .strength-bar-fill {
+            height: 100%;
+            border-radius: 100px;
+            transition: width 0.3s, background 0.3s;
+            width: 0%;
+        }
+
+        .strength-label {
+            font-size: 0.72rem;
+            color: var(--muted);
+        }
+
+        /* Password toggle */
+        .pwd-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+
+        .pwd-toggle:hover { color: var(--text); }
+
+        /* Terms checkbox */
+        .terms-wrap {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 24px;
+            cursor: pointer;
+            animation: fadeUp 0.5s ease 0.25s both;
+        }
+
+        .terms-wrap input[type="checkbox"] { display: none; }
+
+        .custom-check {
+            width: 18px; height: 18px;
+            border: 1.5px solid var(--border);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .terms-wrap:has(input:checked) .custom-check {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .check-mark {
+            color: white;
+            font-size: 10px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .terms-wrap:has(input:checked) .check-mark { opacity: 1; }
+
+        .terms-text {
+            font-size: 0.82rem;
+            color: var(--muted);
+            line-height: 1.5;
+            user-select: none;
+        }
+
+        .terms-text a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .terms-text a:hover { text-decoration: underline; }
+
+        /* Submit */
+        .btn-auth {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            animation: fadeUp 0.5s ease 0.3s both;
+        }
+
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(124,109,250,0.35);
+        }
+
+        .btn-auth:active { transform: translateY(0); }
+
+        .btn-auth.loading .btn-text { opacity: 0; }
+        .btn-auth.loading .btn-spinner { opacity: 1; }
+
+        .btn-spinner {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+        }
+
+        .spinner-ring {
+            width: 20px; height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        /* Divider */
+        .or-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+            animation: fadeUp 0.5s ease 0.35s both;
+        }
+
+        .or-line { flex: 1; height: 1px; background: var(--border); }
+        .or-text { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.05em; }
+
+        /* Social */
+        .social-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            animation: fadeUp 0.5s ease 0.4s both;
+        }
+
+        .btn-social {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-social:hover {
+            border-color: var(--accent);
+            background: rgba(124,109,250,0.06);
+        }
+
+        /* Alert */
+        .alert-box {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.86rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: shake 0.4s ease;
+        }
+
+        .alert-error {
+            background: rgba(250,109,142,0.1);
+            border: 1px solid rgba(250,109,142,0.3);
+            color: var(--accent2);
+        }
+
+        .alert-success {
+            background: rgba(77,222,154,0.1);
+            border: 1px solid rgba(77,222,154,0.3);
+            color: var(--correct);
+        }
+
+        @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeUp   { from { opacity:0; transform:translateY(16px);  } to { opacity:1; transform:translateY(0); } }
+        @keyframes spin     { to { transform: rotate(360deg); } }
+        @keyframes shake {
+            0%,100% { transform:translateX(0); }
+            20%     { transform:translateX(-6px); }
+            40%     { transform:translateX(6px); }
+            60%     { transform:translateX(-4px); }
+            80%     { transform:translateX(4px); }
+        }
+
+        @media (max-width: 768px) {
+            body { grid-template-columns: 1fr; }
+            .panel-left { display: none; }
+            .panel-right { padding: 40px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LEFT PANEL -->
+    <div class="panel-left">
+        <div class="brand-area">
+            <div class="logo">
+                <div class="logo-icon">🧠</div>
+                <div class="logo-name">QuizCraft AI</div>
+            </div>
+            <h1 class="tagline">
+                Start learning<br>
+                <span class="gradient-word">smarter</span><br>
+                today — free.
+            </h1>
+            <p class="tagline-sub">
+                Join thousands of students and educators who use QuizCraft AI to turn study materials into interactive quizzes.
+            </p>
+
+            <div class="testimonial">
+                <p class="testimonial-text">
+                    "I uploaded my entire semester's notes and got a perfectly balanced quiz in under 30 seconds. This is a game changer for exam prep."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">👤</div>
+                    <div>
+                        <div class="author-name">Priya Sharma</div>
+                        <div class="author-role">Medical Student, AIIMS Delhi</div>
+                    </div>
+                    <div class="stars">★★★★★</div>
+                </div>
+            </div>
+        </div>
+        <div class="left-footer">
+            © 2025 QuizCraft AI. All rights reserved.
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="panel-right">
+        <div class="form-container">
+
+            <div class="form-header">
+                <h2>Create your account</h2>
+                <p>Already have one? <a href="/login">Sign in →</a></p>
+            </div>
+
+            {% if error %}
+            <div class="alert-box alert-error">⚠ {{ error }}</div>
+            {% endif %}
+
+            {% if success %}
+            <div class="alert-box alert-success">✓ {{ success }}</div>
+            {% endif %}
+
+            <form method="post" id="signupForm">
+
+                <div class="fields-row">
+                    <div class="field-group">
+                        <label class="field-label">First name</label>
+                        <div class="input-wrap">
+                            <input type="text" name="first_name" class="field-input no-icon" placeholder="Aarav" required autocomplete="given-name">
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Last name</label>
+                        <div class="input-wrap">
+                            <input type="text" name="last_name" class="field-input no-icon" placeholder="Singh" required autocomplete="family-name">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Email address</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">✉</span>
+                        <input type="email" name="email" class="field-input" placeholder="you@example.com" required autocomplete="email">
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Password</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" name="password" class="field-input" id="pwdInput" placeholder="Create a strong password" required autocomplete="new-password" minlength="8">
+                        <button type="button" class="pwd-toggle" id="pwdToggle">👁</button>
+                    </div>
+                    <div class="pwd-strength" id="pwdStrength">
+                        <div class="strength-bar-wrap">
+                            <div class="strength-bar-fill" id="strengthBar"></div>
+                        </div>
+                        <span class="strength-label" id="strengthLabel">Too short</span>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Confirm password</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" name="confirm_password" class="field-input" id="confirmInput" placeholder="Repeat your password" required autocomplete="new-password">
+                    </div>
+                </div>
+
+                <label class="terms-wrap">
+                    <input type="checkbox" name="terms" required>
+                    <div class="custom-check">
+                        <span class="check-mark">✓</span>
+                    </div>
+                    <span class="terms-text">
+                        I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>
+                    </span>
+                </label>
+
+                <button type="submit" class="btn-auth" id="signupBtn">
+                    <span class="btn-text">Create Account →</span>
+                    <span class="btn-spinner"><span class="spinner-ring"></span></span>
+                </button>
+            </form>
+
+            <div class="or-divider">
+                <div class="or-line"></div>
+                <span class="or-text">OR SIGN UP WITH</span>
+                <div class="or-line"></div>
+            </div>
+
+            <div class="social-btns">
+                <a href="/auth/google" class="btn-social">
+                    <span>🌐</span> Google
+                </a>
+                <a href="/auth/github" class="btn-social">
+                    <span>🐱</span> GitHub
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Password visibility
+        const pwdInput = document.getElementById('pwdInput');
+        const pwdToggle = document.getElementById('pwdToggle');
+        pwdToggle.addEventListener('click', () => {
+            const show = pwdInput.type === 'password';
+            pwdInput.type = show ? 'text' : 'password';
+            pwdToggle.textContent = show ? '🙈' : '👁';
+        });
+
+        // Password strength meter
+        const strengthBar = document.getElementById('strengthBar');
+        const strengthLabel = document.getElementById('strengthLabel');
+        const pwdStrength = document.getElementById('pwdStrength');
+
+        pwdInput.addEventListener('input', () => {
+            const val = pwdInput.value;
+            pwdStrength.classList.toggle('visible', val.length > 0);
+
+            let score = 0;
+            if (val.length >= 8) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            const levels = [
+                { w: '25%', color: '#fa6d8e', label: 'Weak' },
+                { w: '50%', color: '#fac86d', label: 'Fair' },
+                { w: '75%', color: '#6dfae0', label: 'Good' },
+                { w: '100%', color: '#4dde9a', label: 'Strong' }
+            ];
+            const lvl = levels[Math.max(0, score - 1)] || levels[0];
+            strengthBar.style.width = val.length < 8 ? '15%' : lvl.w;
+            strengthBar.style.background = val.length < 8 ? '#fa6d8e' : lvl.color;
+            strengthLabel.textContent = val.length < 8 ? 'Too short' : lvl.label;
+            strengthLabel.style.color = val.length < 8 ? '#fa6d8e' : lvl.color;
+        });
+
+        // Loading state
+        const form = document.getElementById('signupForm');
+        const btn = document.getElementById('signupBtn');
+        const confirmInput = document.getElementById('confirmInput');
+
+        form.addEventListener('submit', (e) => {
+            if (pwdInput.value !== confirmInput.value) {
+                e.preventDefault();
+                confirmInput.style.borderColor = 'var(--accent2)';
+                confirmInput.focus();
+                return;
+            }
+            btn.classList.add('loading');
+            btn.disabled = true;
+        });
+
+        confirmInput.addEventListener('input', () => {
+            confirmInput.style.borderColor = '';
+        });
+    </script>
+</body>
+</html>
