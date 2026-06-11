@@ -14,6 +14,9 @@ import os, random, json, time
 from datetime import datetime, timedelta
 from functools import wraps
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask, request, render_template, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -27,7 +30,7 @@ from google.genai import types
 
 # ── App & config ──────────────────────────────────────
 app = Flask(__name__)
-app.config["SECRET_KEY"]                     = "quizcraft-capstone-2025-secret"
+app.config["SECRET_KEY"]                     = os.environ.get("SECRET_KEY", "quizcraft-capstone-2025-secret")
 app.config["SQLALCHEMY_DATABASE_URI"]        = "sqlite:///quizcraft.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["PERMANENT_SESSION_LIFETIME"]     = timedelta(days=7)
@@ -65,7 +68,7 @@ def current_user():
     return User.query.get(session["user_id"]) if "user_id" in session else None
 
 # ── Gemini / RAG ──────────────────────────────────────
-GEMINI_API_KEY   = "AIzaSyChls8lig5p610pcgCTh2s1tDcYIplB-WE"
+GEMINI_API_KEY   = os.environ.get("GEMINI_API_KEY")
 client_ai        = genai.Client(api_key=GEMINI_API_KEY)
 GENERATION_MODEL = "gemini-2.5-flash-lite"
 EMBEDDING_MODEL  = "gemini-embedding-001"
